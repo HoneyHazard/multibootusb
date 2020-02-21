@@ -1,0 +1,327 @@
+dir=/boot/isos
+
+# FEDORA
+fedora=$dir/fedora.iso
+if [ -e "$fedora" ]; then
+    set gfxpayload=keep
+    submenu "Fedora" {
+      loopback loop "$fedora"
+      probe --label --set=cd_label (loop)
+      menuentry "Start Fedora Live" {
+        bootoptions="iso-scan/filename=$fedora root=live:CDLABEL=${cd_label} rd.live.image"
+        linux (loop)/isolinux/vmlinuz $bootoptions
+        initrd (loop)/isolinux/initrd.img
+      }
+      menuentry "Start Fedora Live in basic graphics mode" {
+        bootoptions="iso-scan/filename=$fedora root=live:CDLABEL=$cd_label rd.live.image nomodeset"
+        linux (loop)/isolinux/vmlinuz $bootoptions
+        initrd (loop)/isolinux/initrd.img
+      }
+      menuentry "Test this media & start Fedora Live" {
+        bootoptions="iso-scan/filename=$fedora root=live:CDLABEL=$cd_label rd.live.image rd.live.check"
+        linux (loop)/isolinux/vmlinuz $bootoptions
+        initrd (loop)/isolinux/initrd.img
+      }
+      menuentry "Run a memory test" {
+        bootoptions=""
+        linux16 (loop)/isolinux/memtest $bootoptions
+      }
+    }
+fi
+
+# # DEBIAN
+# debian=$dir/debian.iso
+# if [ -e "$debian" ]; then
+#     submenu "Debian" {
+#       export iso_path
+#       search --set=root --file "$debian"
+#       loopback loop "$debian"
+#       root=(loop)
+#       configfile /boot/grub/grub.cfg
+#       loopback --delete loop
+#     }
+# fi
+
+# MX
+mx=$dir/mx.iso
+if [ -e "$mx" ]; then
+    submenu "MX" {
+      loopback loop "$mx"
+      menuentry "MX" {
+        bootoptions="from=hd,usb root=UUID=$rootuuid fromiso=$mx"
+        linux (loop)/antiX/vmlinuz $bootoptions
+        initrd (loop)/antiX/initrd.gz
+      }
+      menuentry "MX Customize Boot (text menus)" {
+        bootoptions="from=hd,usb root=UUID=$rootuuid fromiso=$mx menus"
+        linux (loop)/antiX/vmlinuz $bootoptions
+        initrd (loop)/antiX/initrd.gz
+      }
+      menuentry "MX Failsafe" {
+        bootoptions="from=hd,usb root=UUID=$rootuuid fromiso=$mx nomodeset failsafe"
+        linux (loop)/antiX/vmlinuz $bootoptions
+        initrd (loop)/antiX/initrd.gz
+      }
+      menuentry "MX Modesetting Video" {
+        bootoptions="from=hd,usb root=UUID=$rootuuid fromiso=$mx xorg=modesetting"
+        linux (loop)/antiX/vmlinuz $bootoptions
+        initrd (loop)/antiX/initrd.gz
+      }
+      menuentry "MX No Xorg Config" {
+        bootoptions="from=hd,usb root=UUID=$rootuuid fromiso=$mx noxorg"
+        linux (loop)/antiX/vmlinuz $bootoptions
+        initrd (loop)/antiX/initrd.gz
+      }
+    }
+fi
+
+# KALI
+$kali=$dir/kali.iso
+# if [ -e "$kali" ]; then
+#      submenu "Kali" {
+#        loopback loop "$$kali"
+#        menuentry "Live" {
+#          bootoptions="findiso=$$kali boot=live components splash username=root hostname=kali"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#        menuentry "Live (failsafe)" {
+#          bootoptions="findiso=$$kali boot=live components username=root hostname=kali memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#        menuentry "Live (forensic mode)" {
+#          bootoptions="findiso=$$kali boot=live components splash username=root hostname=kali noswap noautomount"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#        menuentry "Live USB Persistence (check kali.org/prst)" {
+#          bootoptions="findiso=$$kali boot=live noconfig=sudo username=root hostname=kali persistence"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#        menuentry "Live USB Encrypted Persistence (check kali.org/prst)" {
+#          bootoptions="findiso=$$kali boot=live persistent=cryptsetup persistence-encryption=luks noconfig=sudo username=root hostname=kali persistence"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#      }
+# fi
+
+# MANJARO
+manjaro=$dir/manjaro.iso
+if [ -e "$manjaro" ]; then
+    submenu "Manjaro" {
+      loopback loop "$manjaro"
+      probe --label --set=cd_label (loop)
+      menuentry "Start Manjaro Linux" {
+        bootoptions="img_dev=$manjaro img_loop=$manjaro earlymodules=loop misobasedir=manjaro misolabel=$cd_label nouveau.modeset=1 i915.modeset=1 radeon.modeset=1 logo.nologo overlay=free showopts"
+        linux (loop)/boot/vmlinuz-x86_64 $bootoptions
+        initrd (loop)/boot/initramfs-x86_64.img
+      }
+      menuentry "Start (non-free drivers)" {
+        bootoptions="img_dev=$manjaro img_loop=$manjaro earlymodules=loop misobasedir=manjaro misolabel=$cd_label nouveau.modeset=0 i915.modeset=1 radeon.modeset=0 nonfree=yes logo.nologo overlay=nonfree showopts"
+        linux (loop)/boot/vmlinuz-x86_64 $bootoptions
+        initrd (loop)/boot/initramfs-x86_64.img
+      }
+    }
+fi
+
+# # TAILS
+# set tails=$dir/tails.iso
+#  if [ -e "$tails" ]; then
+#      submenu "Tails" {
+#        insmod ext2
+#        menuentry "Tails" {
+#        loopback loop "$tails"        
+#          bootoptions="boot=live findiso=$tails toram=(loop)/live/filesystem.squashfs config live-media=removeable apparmor=1 security=apparmor nopersistence noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails kaslr slab_nomerge slub_debug=FZP mce=0 vsyscall=none page_poison=1 union=aufs"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+# #          set linux_gfx_mode=
+# #          export linux_gfx_mode
+# #          syslinux_configfile (loop)/efi/boot/syslinux.cfg
+#        }
+#        menuentry "Tails (Troubleshooting Mode)" {
+#          bootoptions="findiso=$tails boot=live config apparmor=1 security=apparmor nopersistence noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails kaslr slab_nomerge slub_debug=FZP mce=0 vsyscall=none page_poison=1 union=aufs  noapic noapm nodma nomce nolapic nomodeset nosmp vga=normal"
+#          linux (loop)/live/vmlinuz $bootoptions
+#          initrd (loop)/live/initrd.img
+#        }
+#      }
+#  fi
+
+# ANDROID
+ android=$dir/android.iso
+ if [ -e "$android" ]; then
+     submenu "Android x86" {
+       loopback loop "$android"
+       menuentry "Live CD - Run without installation" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive"
+         linux (loop)/kernel $bootoptions
+         initrd (loop)/initrd.img
+       }
+       menuentry "Live CD - Debug mode" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive DEBUG=2"
+         linux (loop)/kernel $bootoptions
+         initrd (loop)/initrd.img
+       }
+       menuentry "Installation - Install to harddisk" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive INSTALL=1"
+         linux (loop)/kernel $bootoptions
+         initrd (loop)/initrd.img
+       }
+       menuentry "Live CD VESA mode - No GPU hardware acceleration" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive nomodeset vga=ask"
+         linux16 (loop)/kernel $bootoptions
+         initrd16 (loop)/initrd.img
+       }
+       menuentry "Auto_Installation - Auto Install to specified harddisk" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive AUTO_INSTALL=0"
+         linux (loop)/kernel $bootoptions
+         initrd (loop)/initrd.img
+       }
+       menuentry "Auto_Update - Auto update" {
+         bootoptions="iso-scan/filename=$android androidboot.selinux=permissive AUTO_INSTALL=update"
+         linux (loop)/kernel $bootoptions
+         initrd (loop)/initrd.img
+       }
+     }
+ fi
+
+# GPARTED
+ gparted=$dir/gparted.iso
+ if [ -e "$isofile" ]; then
+     submenu "Gparted" {
+       loopback loop "$gparted"
+       menuentry "GParted Live (Default settings)" {
+         bootoptions="findiso=$gparted boot=live union=overlay username=user config components noswap  ip= net.ifnames=0  nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "GParted Live (Default settings, KMS)" {
+         bootoptions="findiso=$gparted boot=live union=overlay username=user config components noswap vga=791 ip= net.ifnames=0  nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "GParted Live (To RAM. Boot media can be removed later)" {
+         bootoptions="findiso=$gparted boot=live union=overlay username=user config components noswap  toram=filesystem.squashfs ip= net.ifnames=0  nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "GParted Live (Safe graphic settings)" {
+         bootoptions="findiso=$gparted boot=live union=overlay username=user config components noswap ip= net.ifnames=0 nomodeset vga=normal nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "GParted Live (Failsafe mode)" {
+         bootoptions="findiso=$gparted boot=live union=overlay username=user config components noswap acpi=off irqpoll noapic noapm nodma nomce nolapic nosmpip= net.ifnames=0 nomodeset vga=normal nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Memory test using Memtest86+" {
+         bootoptions=""
+         linux16 (loop)/live/memtest $bootoptions
+       }
+     }
+ fi
+
+ # CLONEZILLA
+ clonezilla=$dir/clonezilla.iso
+ if [ -e "$clonezilla" ]; then
+     submenu "Clonezilla" {
+       loopback loop "$clonezilla"
+       menuentry "Clonezilla live (Default settings, VGA 1024x768)" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no vga=791 ip= net.ifnames=0  nosplash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live (Default settings, VGA 800x600)" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no vga=788 ip= net.ifnames=0  nosplash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live (Default settings, VGA 640x480)" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no vga=785 ip= net.ifnames=0  nosplash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live KMS" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no vga=791 ip= net.ifnames=0  nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live (To RAM)" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no vga=788 toram=filesystem.squashfs ip= net.ifnames=0  nosplash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live without framebuffer" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no ip= net.ifnames=0 nomodeset vga=normal nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       menuentry "Clonezilla live failsafe mode" {
+         bootoptions="findiso=$clonezilla boot=live union=overlay username=user config components noswap edd=on nomodeset nodmraid locales= keyboard-layouts= ocs_live_run='ocs-live-general' ocs_live_extra_param='' ocs_live_batch=no acpi=off irqpoll noapic noapm nodma nomce nolapic nosmp ip= net.ifnames=0 nomodeset vga=normal nosplash"
+         linux (loop)/live/vmlinuz $bootoptions
+         initrd (loop)/live/initrd.img
+       }
+       submenu "Memtest & FreeDOS ->" {
+         menuentry "Memory test using Memtest86+" {
+           bootoptions=""
+           linux16 (loop)/live/memtest $bootoptions
+         }
+         menuentry "FreeDOS" {
+           bootoptions=""
+           linux16 (loop)/syslinux/memdisk $bootoptions
+           initrd16 (loop)/live/freedos.img
+         }
+       }
+       menuentry "iPXE" {
+         bootoptions=""
+         linux16 (loop)/live/ipxe.lkn $bootoptions
+       }
+     }
+ fi
+
+qubes=$dir/qubes.iso
+if [ -e "$qubes" ]; then
+    submenu "Qubes" {
+      loopback loop "$qubes"
+      probe --label --set=cd_label (loop)
+      menuentry "Install Qubes" {
+        bootoptions="iso-scan/filename=$qubes inst.stage2=hd:LABEL=$cd_label i915.preliminary_hw_support=1 quiet rhgb"
+        multiboot (loop)/isolinux/xen.gz
+        module (loop)/isolinux/vmlinuz $bootoptions
+        module (loop)/isolinux/initrd.img
+      }
+      menuentry "Test this media & install Qubes" {
+        bootoptions="iso-scan/filename=$qubes inst.stage2=hd:LABEL=$cd_label i915.preliminary_hw_support=1 quiet rhgb rd.live.check"
+        multiboot (loop)/isolinux/xen.gz
+        module (loop)/isolinux/vmlinuz $bootoptions
+        module (loop)/isolinux/initrd.img
+      }
+      menuentry "Install Qubes in basic graphics mode" {
+        bootoptions="iso-scan/filename=$qubes inst.stage2=hd:LABEL=$cd_label xdriver=vesa nomodeset quiet"
+        multiboot (loop)/isolinux/xen.gz
+        module (loop)/isolinux/vmlinuz $bootoptions
+        module (loop)/isolinux/initrd.img
+      }
+      menuentry "Rescue a Qubes system" {
+        bootoptions="iso-scan/filename=$qubes inst.stage2=hd:LABEL=$cd_label rescue quiet"
+        multiboot (loop)/isolinux/xen.gz
+        module (loop)/isolinux/vmlinuz $bootoptions
+        module (loop)/isolinux/initrd.img
+      }
+    }
+  fi
+
+
+# MEMTEST
+memtest=$dir/memtest.iso
+if [ -e "$memtest" ]; then
+    menuentry "Memtest86" {
+      bootoptions="iso raw"
+      linux16 $prefix/memdisk $bootoptions
+      initrd16 $memtest
+    }
+fi
+

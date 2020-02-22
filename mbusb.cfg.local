@@ -314,6 +314,14 @@ if [ -e "$qubes" ]; then
     }
   fi
 
+openbsd=$dir/openbsd.iso
+if [ -e "$openbsd" ]; then
+	loopback loop "$openbsd"
+	menuentry "OpenBSD" {
+	  bootoptions=""
+	  kopenbsd (loop)/*/*/bsd.rd $bootoptions
+	}
+fi
 
 # MEMTEST
 memtest=$dir/memtest.iso

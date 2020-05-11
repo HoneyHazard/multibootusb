@@ -1,4 +1,5 @@
 dir=/boot/isos
+drive=/dev/sdb3
 
 # FEDORA
 fedora=$dir/fedora.iso
@@ -76,37 +77,37 @@ if [ -e "$mx" ]; then
 fi
 
 # KALI
-$kali=$dir/kali.iso
-# if [ -e "$kali" ]; then
-#      submenu "Kali" {
-#        loopback loop "$$kali"
-#        menuentry "Live" {
-#          bootoptions="findiso=$$kali boot=live components splash username=root hostname=kali"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#        menuentry "Live (failsafe)" {
-#          bootoptions="findiso=$$kali boot=live components username=root hostname=kali memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#        menuentry "Live (forensic mode)" {
-#          bootoptions="findiso=$$kali boot=live components splash username=root hostname=kali noswap noautomount"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#        menuentry "Live USB Persistence (check kali.org/prst)" {
-#          bootoptions="findiso=$$kali boot=live noconfig=sudo username=root hostname=kali persistence"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#        menuentry "Live USB Encrypted Persistence (check kali.org/prst)" {
-#          bootoptions="findiso=$$kali boot=live persistent=cryptsetup persistence-encryption=luks noconfig=sudo username=root hostname=kali persistence"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#      }
-# fi
+kali=$dir/kali.iso
+if [ -e "$kali" ]; then
+      submenu "Kali" {
+        loopback loop "$kali"
+        menuentry "Live" {
+          bootoptions="fromiso=$drive/$kali boot=live components splash username=root hostname=kali"
+          linux (loop)/live/vmlinuz $bootoptions
+          initrd (loop)/live/initrd.img
+        }
+        menuentry "Live (failsafe)" {
+          bootoptions="fromiso=$drive/$kali boot=live components username=root hostname=kali memtest noapic noapm nodma nomce nolapic nomodeset nosmp nosplash vga=normal"
+          linux (loop)/live/vmlinuz $bootoptions
+          initrd (loop)/live/initrd.img
+        }
+        menuentry "Live (forensic mode)" {
+          bootoptions="fromiso=$drive/$kali boot=live components splash username=root hostname=kali noswap noautomount"
+          linux (loop)/live/vmlinuz $bootoptions
+          initrd (loop)/live/initrd.img
+        }
+        menuentry "Live USB Persistence (check kali.org/prst)" {
+          bootoptions="fromiso=$drive/$kali boot=live noconfig=sudo username=root hostname=kali persistence"
+          linux (loop)/live/vmlinuz $bootoptions
+          initrd (loop)/live/initrd.img
+        }
+        menuentry "Live USB Encrypted Persistence (check kali.org/prst)" {
+          bootoptions="fromiso=$drive/$kali boot=live persistent=cryptsetup persistence-encryption=luks noconfig=sudo username=root hostname=kali persistence"
+          linux (loop)/live/vmlinuz $bootoptions
+          initrd (loop)/live/initrd.img
+        }
+      }
+fi
 
 # MANJARO
 manjaro=$dir/manjaro.iso
@@ -127,27 +128,15 @@ if [ -e "$manjaro" ]; then
     }
 fi
 
-# # TAILS
-# set tails=$dir/tails.iso
-#  if [ -e "$tails" ]; then
-#      submenu "Tails" {
-#        insmod ext2
-#        menuentry "Tails" {
-#        loopback loop "$tails"        
-#          bootoptions="boot=live findiso=$tails toram=(loop)/live/filesystem.squashfs config live-media=removeable apparmor=1 security=apparmor nopersistence noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails kaslr slab_nomerge slub_debug=FZP mce=0 vsyscall=none page_poison=1 union=aufs"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-# #          set linux_gfx_mode=
-# #          export linux_gfx_mode
-# #          syslinux_configfile (loop)/efi/boot/syslinux.cfg
-#        }
-#        menuentry "Tails (Troubleshooting Mode)" {
-#          bootoptions="findiso=$tails boot=live config apparmor=1 security=apparmor nopersistence noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails kaslr slab_nomerge slub_debug=FZP mce=0 vsyscall=none page_poison=1 union=aufs  noapic noapm nodma nomce nolapic nomodeset nosmp vga=normal"
-#          linux (loop)/live/vmlinuz $bootoptions
-#          initrd (loop)/live/initrd.img
-#        }
-#      }
-#  fi
+# TAILS
+tails=$dir/tails.iso
+if [ -e "$tails" ]; then
+    menuentry "Tails" {
+        loopback loop "$tails"
+        linux (loop)/live/vmlinuz boot=live fromiso=$drive/$tails config noautologin nopersistence
+        initrd (loop)/live/initrd.img
+    }
+fi
 
 # ANDROID
  android=$dir/android.iso
